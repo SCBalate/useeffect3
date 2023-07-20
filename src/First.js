@@ -1,41 +1,46 @@
-import React,{useState,useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { fakeFetch } from './Constants/FirstConst';
 
-function First() {
-    const[temperature,setTemperature] = useState([]);
-    const[symbol,setSymbol] = useState('C');
+const First = () => {
+  const [weatherData, setWeatherData] = useState(null);
+  const [isCelsius, setIsCelsius] = useState(true);
+
+  useEffect(() => {
+    // Replace 'YOUR_API_KEY' with your actual API key and 'YOUR_CITY_NAME' with the desired city
    
+     fetchData();
+  }, []);
+ 
+  const fetchData =async()=>{
+    try{
+        const response = await fakeFetch(`https://example.com/api/weather`);
+        const{data} = response
+        setWeatherData(data);
+    }catch(error){
+        console.log("Error while fetchin data" + error);
+    }
+  }
 
-useEffect(()=>{
-    fetchData();
-},[])
+  const toggleTemperatureUnit = () => {
+    setIsCelsius(prevState => !prevState);
+  };
 
-const fetchData = async()=>{
-    try
-   { const response= await fakeFetch("https://example.com/api/weather");
-    const{data} = response
-    setTemperature(data);
-}catch(err){
-console.log("Error while fetching data"+ err);
-}
-}
+  if (!weatherData) {
+    return <div>Loading...</div>;
+  }
 
-const convertTemp= () =>{
-    setTemperature(prevTemp =>({...prevTemp , temperature:   (prevTemp.temperature * 9/5) + 32}));
-    setSymbol("F");
-    
-}
+  const temperatureInCelsius = weatherData.temperature;
+  const temperatureInFahrenheit = (temperatureInCelsius * 9) / 5 + 32;
 
-  return temperature && (
+  return (
     <div>
-        <div>
-        { temperature.temperature} &deg;{symbol}
-        </div>
-        <div>{temperature.humidity} %</div>
-        <div>{temperature.windSpeed} km/h</div>
-        <button onClick={convertTemp} >Switch to Fahrenheit</button>
-        </div>
-  )
-}
+      <h1>Weather Information</h1>
+      <p>Current Temperature: {isCelsius ? temperatureInCelsius.toFixed(2) : temperatureInFahrenheit.toFixed(2)} {isCelsius ? '°C' : '°F'}</p>
+      <p>Humidity: {weatherData.humidity}%</p>
+      <p>Wind Speed: {weatherData.windSpeed} Km/h</p>
+      <button onClick={toggleTemperatureUnit}>Toggle Temperature Unit</button>
+    </div>
+  );
+};
 
-export default First
+export default First;
